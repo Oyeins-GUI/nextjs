@@ -12,6 +12,7 @@ import { Button } from "@/app/ui/button";
 import { updateInvoice } from "@/app/lib/actions";
 import { useActionState } from "react";
 import { format } from "path";
+import Loader from "../loader";
 
 export default function EditInvoiceForm({
    invoice,
@@ -22,9 +23,9 @@ export default function EditInvoiceForm({
 }) {
    const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
    const initialState = { message: "", errors: {} };
-   const [state, formAction] = useActionState(
+   const [state, formAction, isPending] = useActionState(
       updateInvoiceWithId,
-      initialState
+      initialState,
    );
 
    return (
@@ -160,7 +161,16 @@ export default function EditInvoiceForm({
             >
                Cancel
             </Link>
-            <Button type="submit">Edit Invoice</Button>
+            <Button type="submit" disabled={isPending}>
+               {isPending ? (
+                  <>
+                     <p className="mr-1">Editing...</p>
+                     <Loader />
+                  </>
+               ) : (
+                  "Edit Invoice"
+               )}
+            </Button>
          </div>
       </form>
    );

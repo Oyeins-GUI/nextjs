@@ -11,10 +11,14 @@ import {
 import { Button } from "@/app/ui/button";
 import { createInvoice } from "@/app/lib/actions";
 import { useActionState } from "react";
+import Loader from "../loader";
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
    const initialState = { message: "", errors: {} };
-   const [state, formAction] = useActionState(createInvoice, initialState);
+   const [state, formAction, isPending] = useActionState(
+      createInvoice,
+      initialState,
+   );
 
    return (
       <form action={formAction}>
@@ -146,7 +150,16 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
             >
                Cancel
             </Link>
-            <Button type="submit">Create Invoice</Button>
+            <Button type="submit" disabled={isPending}>
+               {isPending ? (
+                  <>
+                     <p className="mr-1">Creating...</p>
+                     <Loader />
+                  </>
+               ) : (
+                  "Create Invoice"
+               )}
+            </Button>
          </div>
       </form>
    );

@@ -11,13 +11,14 @@ import { Button } from "./button";
 import { useActionState } from "react";
 import { authenticate } from "../lib/actions";
 import { useSearchParams } from "next/navigation";
+import Loader from "./loader";
 
 export default function LoginForm() {
    const searchParams = useSearchParams();
    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
    const [errorMsg, formAction, isPending] = useActionState(
       authenticate,
-      undefined
+      undefined,
    );
 
    return (
@@ -69,10 +70,22 @@ export default function LoginForm() {
             </div>
             <input type="hidden" name="redirectTo" value={callbackUrl} />
             <Button className="mt-4 w-full" aria-disabled={isPending}>
-               Log in{" "}
-               <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
+               {!isPending ? (
+                  <>
+                     Log in{" "}
+                     <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
+                  </>
+               ) : (
+                  <>
+                     Logging in...
+                     <Loader />
+                  </>
+               )}
             </Button>
-            <div className="flex h-8 items-end space-x-1">
+            <div
+               className="flex h-8 items-end space-x-1"
+               aria-describedby="login-error"
+            >
                {errorMsg && (
                   <>
                      <ExclamationCircleIcon className="h-5 w-5 text-red-500" />

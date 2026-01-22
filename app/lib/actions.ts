@@ -8,6 +8,25 @@ import postgres from "postgres";
 import { z } from "zod";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
+const FormSchema = z.object({
+   id: z.string(),
+   customerId: z.string({
+      invalid_type_error: "Please select a customer",
+   }),
+   amount: z.coerce
+      .number()
+      .gt(0, { message: "Please enter a number greater than $0" }),
+   status: z.enum(["pending", "paid"], {
+      invalid_type_error: "Please select an invoice status",
+   }),
+   date: z.string(),
+});
+
+const LoginSchema = z.object({
+   email: z.string().email(),
+   password: z.string().min(6),
+   redirectTo: z.string(),
+});
 
 export type State = {
    errors?: {
@@ -20,9 +39,8 @@ export type State = {
 
 export async function authenticate(
    prevState: string | undefined,
-   formData: FormData
+   formData: FormData,
 ) {
-   console.log({ formData });
    try {
       await signIn("credentials", formData);
    } catch (error) {
@@ -37,20 +55,6 @@ export async function authenticate(
       throw error;
    }
 }
-
-const FormSchema = z.object({
-   id: z.string(),
-   customerId: z.string({
-      invalid_type_error: "Please select a customer",
-   }),
-   amount: z.coerce
-      .number()
-      .gt(0, { message: "Please enter a number greater than $0" }),
-   status: z.enum(["pending", "paid"], {
-      invalid_type_error: "Please select an invoice status",
-   }),
-   date: z.string(),
-});
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
@@ -92,7 +96,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
 export async function updateInvoice(
    id: string,
    prevState: State,
-   formData: FormData
+   formData: FormData,
 ) {
    console.log({ id, prevState, formData });
    const validatedFields = UpdateInvoice.safeParse({
